@@ -1,0 +1,265 @@
+/* --- TEMEL AYARLAR --- */
+:root {
+    --cake-width: 300px;
+    --cake-height: 200px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #231F42;
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    color: white;
+}
+
+/* --- BAŞLANGIÇ TALİMATI --- */
+.instructions {
+    position: fixed;
+    top: 30px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    z-index: 100;
+}
+
+.instructions.hidden {
+    opacity: 0;
+    transform: translateY(-50px);
+}
+
+/* --- PASTA VE MUMLAR --- */
+.cake-wrapper {
+    position: relative;
+    transition: transform 1s ease-in-out;
+}
+
+.cake {
+    position: relative;
+    width: var(--cake-width);
+    height: var(--cake-height);
+    transform-style: preserve-3d;
+    transition: transform 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* Pasta Kesilme Animasyonu */
+.cake-wrapper.split {
+    transform: scale(0.9);
+}
+.cake-wrapper.split .cake {
+    transform: rotateY(180deg) translateX(50px); /* Örnek bir ayırma animasyonu */
+}
+.cake-wrapper.split .cake-body,
+.cake-wrapper.split .cake-frosting,
+.cake-wrapper.split .cake-top {
+    animation: split-cake 1.2s forwards cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+@keyframes split-cake {
+    0% { transform: translateX(0) rotateZ(0); }
+    100% { transform: translateX(var(--split-direction, 150%)) rotateZ(var(--split-rotation, 15deg)); }
+}
+
+/* Pasta Parçaları (CSS ile Çizim) */
+.cake-top {
+    position: absolute;
+    width: 100%;
+    height: 30px;
+    background: #F1F1F1;
+    top: 0;
+    border-radius: 50% / 15px;
+}
+.cake-frosting {
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    background: linear-gradient(90deg, #FFFDE4, #FFEDC2);
+    top: 15px;
+}
+.cake-body {
+    position: absolute;
+    width: 100%;
+    height: calc(var(--cake-height) - 30px);
+    background: linear-gradient(to right, #6B3E26, #844B2E);
+    top: 30px;
+}
+/* Pastayı ikiye bölmek için pseudo elementler */
+.cake-body::before, .cake-frosting::before, .cake-top::before {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    left: 0;
+    --split-direction: -150%;
+    --split-rotation: -15deg;
+}
+.cake-body::after, .cake-frosting::after, .cake-top::after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    right: 0;
+    --split-direction: 150%;
+    --split-rotation: 15deg;
+}
+
+/* --- MUMLAR --- */
+.candles-container {
+    position: absolute;
+    bottom: calc(var(--cake-height) - 20px);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    z-index: 10;
+}
+
+.candle {
+    position: relative;
+    width: 12px;
+    height: 50px;
+    background: repeating-linear-gradient(45deg, #FF69B4, #FF69B4 5px, #FFFFFF 5px, #FFFFFF 10px);
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+    transition: opacity 0.5s;
+}
+/* Sönen mumun dumanı */
+.candle.extinguished::after {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #555;
+    border-radius: 50%;
+    opacity: 0;
+    animation: smoke-up 2s ease-out forwards;
+}
+@keyframes smoke-up {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20% { opacity: 0.6; }
+    100% { transform: translate(-50%, -40px) scale(1.5); opacity: 0; }
+}
+
+.flame {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    width: 14px;
+    height: 22px;
+    background-color: #ffc107;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 1.5s infinite ease-in-out;
+    transition: all 0.3s ease-out;
+    transform-origin: bottom center;
+}
+@keyframes flicker {
+    0%, 100% { transform: translateX(-50%) scaleY(1) scaleX(1); opacity: 1; }
+    50% { transform: translateX(-50%) scaleY(0.95) scaleX(1.05); opacity: 0.9; }
+}
+
+/* Sönmüş mum */
+.candle.extinguished .flame {
+    opacity: 0;
+    transform: translateX(-50%) scale(0);
+}
+
+/* --- MESAJ ALANI --- */
+.message-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    text-align: center;
+    padding: 30px 40px;
+    background: rgba(10, 5, 20, 0.7);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    transition: opacity 1s ease-out 0.8s, transform 1s ease-out 0.8s;
+    pointer-events: none;
+    z-index: 50;
+}
+.message-container.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.message-container h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 2.8rem;
+    color: #ffd700;
+    text-shadow: 0 0 15px #ffd700, 0 0 25px #ffae00;
+}
+.message-container h2 {
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+.gift-section {
+    margin-top: 10px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.3);
+    padding-top: 20px;
+    width: 100%;
+}
+.gift-section p { font-size: 1.1rem; }
+.gift-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.3rem;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: inline-block;
+    border: 1px dashed #ffd700;
+    font-weight: 700;
+}
+
+/* --- FOTOĞRAFLAR --- */
+.photos-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+.photo {
+    position: absolute;
+    width: 150px;
+    height: auto;
+    border: 5px solid white;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.1);
+    transition: opacity 1s ease, transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.photo.show {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rotation));
+}
+
+/* --- TELEFON UYUMLULUĞU --- */
+@media (max-width: 768px) {
+    :root {
+        --cake-width: 260px;
+        --cake-height: 170px;
+    }
+    .candles-container {
+        gap: 5px;
+    }
+    .message-container h1 { font-size: 2rem; }
+    .message-container h2 { font-size: 1.2rem; }
+    .photo { width: 100px; }
+}
